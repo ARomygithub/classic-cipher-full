@@ -1,0 +1,30 @@
+<h1>Home#index</h1>
+
+<%= form_with url:false do |f| %>
+  <%= f.label :input_type %>
+  <%= f.select :select_type, Array["text", "file"] %> <br/>
+  <div id="input_text_field" style="display: block">
+    <%= f.label :input_text %>
+    <%= f.text_field :input_text %> <br/>
+  </div>
+  <div id="input_file_field" style="display: none">
+    <%= f.label :input_file %>
+    <%= f.file_field :input_file %> <br/>
+  </div>
+<% end %>
+
+<script>
+    $(document).ready(function() {
+        $('#select_type').change(function() {
+            var selectedValue = $(this).val();
+
+            if (selectedValue === 'text') {
+                $('#input_file_field').hide();
+                $('#input_text_field').show();
+            } else {
+                $('#input_text_field').hide();
+                $('#input_file_field').show();
+            }
+        });
+    });
+</script>
