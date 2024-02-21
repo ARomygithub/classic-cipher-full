@@ -1,7 +1,7 @@
 <h1>Home#index</h1>
 
 <%= form_with url:false do |f| %>
-  <%= f.label :input_type %>
+  <%= f.label "Input Type:" %>
   <%= f.select :select_type, Array["text", "file"] %> <br/>
   <div id="input_text_field" style="display: block">
     <%= f.label :input_text %>
@@ -11,9 +11,23 @@
     <%= f.label :input_file %>
     <%= f.file_field :input_file %> <br/>
   </div>
+  <%= f.label "Cipher Type:" %>
+  <%= f.select :cipher_type, Array["Vigenere Cipher", "Auto-Key Vigenere Cipher", "Extended Vigenere Cipher", "Playfair Cipher", "Affine Cipher", "Hill Cipher", "Super Enkripsi"] %> <br/>
+  <div id="string_key_div" style="display: block">
+    <%= f.label "Key:" %>
+    <%= f.text_field :string_key %> <br/>
+  </div>
+  <%= f.submit "encrypt" %>
+  <%= f.submit "decrypt" %>
 <% end %>
 
+<%= form_with url:false do |result| %>
+  <%= result.text_area :result_plain, readonly: true %>
+  <%= result.text_area :result_base64, readonly: true %> <br/>
+  <%= result.submit "Download" %>
+<% end %>
 <script>
+    let cipherType = Array("Vigenere Cipher", "Auto-Key Vigenere Cipher", "Extended Vigenere Cipher", "Playfair Cipher", "Affine Cipher", "Hill Cipher", "Super Enkripsi");
     $(document).ready(function() {
         $('#select_type').change(function() {
             var selectedValue = $(this).val();
@@ -26,5 +40,14 @@
                 $('#input_file_field').show();
             }
         });
+        $("#cipher_type").change(function() {
+            var selectedValue = $(this).val();
+            if (selectedValue === cipherType[0]) {
+                $('#string_key_div').show();
+            } else {
+                $('#string_key_div').hide();
+            }
+        });
+
     });
 </script>
