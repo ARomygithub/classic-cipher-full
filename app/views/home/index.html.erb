@@ -1,4 +1,4 @@
-<h1>Home#index</h1>
+<h1>Classic Cipher Implementation</h1>
 
 <%= form_with url:"home/submit" do |f| %>
   <%= f.label "Input Type:" %>
@@ -17,7 +17,24 @@
     <%= f.label "Key:" %>
     <%= f.text_field :string_key, value: @string_key %> <br/>
   </div>
-  <div id="affine_key_div" style=""
+  <div id="affine_key_div" style="display: none">
+    <%= f.label "m:" %>
+    <%= f.number_field :affine_m, value: @affine_m %> <br/>
+    <%= f.label "b:" %>
+    <%= f.number_field :affine_b, value: @affine_b %> <br/>
+  </div>
+  <div id="hill_key_div" style="display: none">
+    <%= f.label "m:" %>
+    <%= f.number_field :hill_m, value: @hill_m %> <br/>
+    <div id="hill_detail_div">
+      <%for i in 0...(@hill_m.to_i) %>
+        <%for j in 0...(@hill_m.to_i) %>
+          <%= f.number_field "hill_key_#{i}_#{j}", value: @hill_key[i*(@hill_m.to_i)+j] %>
+        <%end%>
+        <br/>
+      <%end%>
+    </div>
+  </div>
   <%= f.submit "encrypt" %>
   <%= f.submit "decrypt" %>
 <% end %>
@@ -55,12 +72,48 @@
         } else {
             $('#string_key_div').hide();
         }
+        if(selectedValue === cipherType[4]) {
+            $('#affine_key_div').show();
+        } else {
+            $('#affine_key_div').hide();
+        }
+        if(selectedValue === cipherType[5]) {
+            $('#hill_key_div').show();
+        } else {
+            $('#hill_key_div').hide();
+        }
         $("#cipher_type").change(function() {
             var selectedValue = $(this).val();
             if (selectedValue === cipherType[0] || selectedValue === cipherType[1] || selectedValue === cipherType[3]) {
                 $('#string_key_div').show();
             } else {
                 $('#string_key_div').hide();
+            }
+            if(selectedValue === cipherType[4]) {
+                $('#affine_key_div').show();
+            } else {
+                $('#affine_key_div').hide();
+            }
+            if(selectedValue === cipherType[5]) {
+                $('#hill_key_div').show();
+            } else {
+                $('#hill_key_div').hide();
+            }
+        });
+
+        // Hill Cipher
+        let hillM = $('#hill_m');
+        hillM.change(function() {
+            let hillDiv = document.getElementById('hill_detail_div');
+            let m = $(this).val();
+            let mInt = parseInt(m);
+            mInt = Math.max(1, mInt);
+            hillDiv.innerHTML = "";
+            for(let i=0;i<mInt;i++) {
+                for(let j = 0;j<mInt;j++) {
+                    hillDiv.insertAdjacentHTML('beforeend', `<input type="number" name=\`hill_key_${i}_${j}\` value="0" min="0" max="25">`);
+                }
+                hillDiv.insertAdjacentHTML('beforeend', '<br/>');
             }
         });
     });

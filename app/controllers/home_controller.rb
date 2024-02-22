@@ -1,4 +1,5 @@
 require 'base64'
+require 'matrix'
 class HomeController < ApplicationController
   def index
     result_id = params[:id]
@@ -31,6 +32,22 @@ class HomeController < ApplicationController
     unless @string_key
       @string_key = ""
     end
+    @affine_m = params[:affine_m]
+    unless @affine_m
+      @affine_m = 1
+    end
+    @affine_b = params[:affine_b]
+    unless @affine_b
+      @affine_b = 0
+    end
+    @hill_m = params[:hill_m]
+    unless @hill_m
+      @hill_m = 1
+    end
+    @hill_key = params[:hill_key]
+    unless @hill_key
+      @hill_key = [1]
+    end
   end
 
   def submit
@@ -40,6 +57,15 @@ class HomeController < ApplicationController
     @input_file = params[:input_file]
     @cipher_type = params[:cipher_type]
     @string_key = params[:string_key]
+    @affine_m = params[:affine_m]
+    @affine_b = params[:affine_b]
+    @hill_m = params[:hill_m]
+    @hill_key = Array.new
+    for i in 0...@hill_m.to_i
+      for j in 0...@hill_m.to_i
+        @hill_key.push(params["hill_key_#{i}_#{j}"])
+      end
+    end
 
     plain = ""
     base64 = ""
@@ -64,10 +90,24 @@ class HomeController < ApplicationController
         base64 = playfair_decrypt(@input_text, @string_key)
       end
       plain = Base64.decode64(base64)
+    elsif @cipher_type == cipherAll[4]
+      if params[:commit] == "encrypt"
+        base64 = affine_encrypt(@input_text, @affine_m, @affine_b)
+      else
+        base64 = affine_decrypt(@input_text, @affine_m, @affine_b)
+      end
+      plain = Base64.decode64(base64)
+    elsif @cipher_type == cipherAll[5]
+      if params[:commit] == "encrypt"
+        base64 = hill_encrypt(@input_text, @hill_m, @hill_key)
+      else
+        base64 = hill_decrypt(@input_text, @hill_m, @hill_key)
+      end
+      plain = Base64.decode64(base64)
     end
     @result = Result.new(plain: plain, base64: base64)
     @result.save
-    redirect_to action: "index", id: @result.id, select_type: @select_type, input_text: @input_text, input_file: @input_file, cipher_type: @cipher_type, string_key: @string_key
+    redirect_to action: "index", id: @result.id, select_type: @select_type, input_text: @input_text, input_file: @input_file, cipher_type: @cipher_type, string_key: @string_key, affine_m: @affine_m, affine_b: @affine_b, hill_m: @hill_m, hill_key: @hill_key
   end
 
   private
@@ -231,6 +271,84 @@ class HomeController < ApplicationController
       i += 2
     end
     result = result.gsub('X', '')
+    Base64.encode64(result)
+  end
+
+  def affine_encrypt(plain, m, b)
+    plain.upcase!
+    plain = remove_all_whitespace(plain)
+    m = m.to_i
+    b = b.to_i
+    result = ""
+    plain.each_char do |c|
+      ord = (m * (c.ord - 'A'.ord) + b) % 26
+      result += (ord + 'A'.ord).chr
+    end
+    Base64.encode64(result)
+  end
+
+  def affine_decrypt(cipher, m, b)
+    cipher.upcase!
+    cipher = remove_all_whitespace(cipher)
+    m = m.to_i
+    b = b.to_i
+    result = ""
+    m_inv = 0
+    (0..25).each do |i|
+      if (m * i) % 26 == 1
+        m_inv = i
+        break
+      end
+    end
+    cipher.each_char do |c|
+      ord = (m_inv * (c.ord - 'A'.ord - b + 26)) % 26
+      result += (ord + 'A'.ord).chr
+    end
+    Base64.encode64(result)
+  end
+
+  def hill_encrypt(plain, m, key)
+    plain.upcase!
+    plain = remove_all_whitespace(plain)
+    m = m.to_i
+    result = ""
+    key_mat = Matrix.build(m) do |row, col|
+      key[row * m + col].to_i
+    end
+    while plain.length % m != 0
+      plain += 'X'
+    end
+    plain.each_char.with_index do |c, i|
+      if i % m == 0
+        result += (key_mat * Matrix.column_vector(plain.chars[i...i+m]).map { |x| (x.ord - 'A'.ord) }).to_a.flatten.map { |x| ((x%26) + 'A'.ord).chr }.join
+      end
+    end
+    Base64.encode64(result)
+  end
+
+  def hill_decrypt(cipher, m, key)
+    cipher.upcase!
+    cipher = remove_all_whitespace(cipher)
+    m = m.to_i
+    result = ""
+    key_mat = Matrix.build(m) do |row, col|
+      key[row * m + col].to_i
+    end
+    det = key_mat.det
+    key_mat_inv = det * key_mat.inv
+    det_inv = 0
+    for i in 1..25
+      if ((det.round.to_i*i % 26)+26)%26 == 1
+        det_inv = i
+        break
+      end
+    end
+    key_mat_inv = key_mat_inv.map { |x| ((x.round.to_i*det_inv % 26)+26)%26 }
+    cipher.each_char.with_index do |c, i|
+      if i%m == 0
+        result += (key_mat_inv * Matrix.column_vector(cipher.chars[i...i+m]).map { |x| (x.ord - 'A'.ord) }).to_a.flatten.map { |x| (((x.round.to_i%26)+26)%26 + 'A'.ord).chr }.join
+      end
+    end
     Base64.encode64(result)
   end
 end
