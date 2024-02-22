@@ -1,34 +1,42 @@
 <h1>Home#index</h1>
 
-<%= form_with url:false do |f| %>
+<%= form_with url:"home/submit" do |f| %>
   <%= f.label "Input Type:" %>
-  <%= f.select :select_type, Array["text", "file"] %> <br/>
-  <div id="input_text_field" style="display: block">
+  <%= f.select :select_type, options_for_select(Array["text", "file"], selected: @select_type) %> <br/>
+  <div id="input_text_field" style="display: none">
     <%= f.label :input_text %>
-    <%= f.text_field :input_text %> <br/>
+    <%= f.text_field :input_text, value: @input_text %> <br/>
   </div>
   <div id="input_file_field" style="display: none">
     <%= f.label :input_file %>
-    <%= f.file_field :input_file %> <br/>
+    <%= f.file_field :input_file, value: @input_file %> <br/>
   </div>
   <%= f.label "Cipher Type:" %>
-  <%= f.select :cipher_type, Array["Vigenere Cipher", "Auto-Key Vigenere Cipher", "Extended Vigenere Cipher", "Playfair Cipher", "Affine Cipher", "Hill Cipher", "Super Enkripsi"] %> <br/>
-  <div id="string_key_div" style="display: block">
+  <%= f.select :cipher_type, options_for_select(Array["Vigenere Cipher", "Auto-Key Vigenere Cipher", "Extended Vigenere Cipher", "Playfair Cipher", "Affine Cipher", "Hill Cipher", "Super Enkripsi"], selected: @cipher_type)  %> <br/>
+  <div id="string_key_div" style="display: none">
     <%= f.label "Key:" %>
-    <%= f.text_field :string_key %> <br/>
+    <%= f.text_field :string_key, value: @string_key %> <br/>
   </div>
   <%= f.submit "encrypt" %>
   <%= f.submit "decrypt" %>
 <% end %>
 
 <%= form_with url:false do |result| %>
-  <%= result.text_area :result_plain, readonly: true %>
-  <%= result.text_area :result_base64, readonly: true %> <br/>
+  <%= result.text_area :result_plain, :value => @result_plain, readonly: true %>
+  <%= result.text_area :result_base64, :value =>@result_base64, readonly: true %> <br/>
   <%= result.submit "Download" %>
 <% end %>
 <script>
-    let cipherType = Array("Vigenere Cipher", "Auto-Key Vigenere Cipher", "Extended Vigenere Cipher", "Playfair Cipher", "Affine Cipher", "Hill Cipher", "Super Enkripsi");
     $(document).ready(function() {
+        let cipherType = Array("Vigenere Cipher", "Auto-Key Vigenere Cipher", "Extended Vigenere Cipher", "Playfair Cipher", "Affine Cipher", "Hill Cipher", "Super Enkripsi");
+        var selectedValue = $('#select_type').val();
+          if (selectedValue === 'text') {
+              $('#input_file_field').hide();
+              $('#input_text_field').show();
+          } else {
+              $('#input_text_field').hide();
+              $('#input_file_field').show();
+          }
         $('#select_type').change(function() {
             var selectedValue = $(this).val();
 
@@ -40,6 +48,12 @@
                 $('#input_file_field').show();
             }
         });
+        selectedValue = $('#cipher_type').val();
+        if (selectedValue === cipherType[0]) {
+            $('#string_key_div').show();
+        } else {
+            $('#string_key_div').hide();
+        }
         $("#cipher_type").change(function() {
             var selectedValue = $(this).val();
             if (selectedValue === cipherType[0]) {
@@ -48,6 +62,5 @@
                 $('#string_key_div').hide();
             }
         });
-
     });
 </script>
