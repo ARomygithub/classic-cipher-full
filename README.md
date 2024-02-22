@@ -1,24 +1,16 @@
-# README
+# Tugas 1 IF4020 Kriptografi
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+## Author:
+- 13520009 - Ahmad Romy Zahran
 
-Things you may want to cover:
+## Dependency
+- Ruby 3.2.2
+- Rails 7.1.3
+- Library Base64 and Matrix
 
-* Ruby version
-
-* System dependencies
-
-* Configuration
-
-* Database creation
-
-* Database initialization
-
-* How to run the test suite
-
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...
+## How to run
+```console
+bundle install
+rails db:migrate
+rails server -b 127.0.0.1 -p 3000 -e development
+```
