@@ -69,39 +69,46 @@ class HomeController < ApplicationController
 
     plain = ""
     base64 = ""
+    input_string = ""
+    if @select_type == "text"
+      input_string = @input_text
+    else
+      uploaded_io = @input_file
+      input_string = uploaded_io.read
+    end
     if @cipher_type == "Vigenere Cipher"
       if params[:commit] == "encrypt"
-        base64 = vigenere_encrypt(@input_text, @string_key)
+        base64 = vigenere_encrypt(input_string, @string_key)
       else
-        base64 = vigenere_decrypt(@input_text, @string_key)
+        base64 = vigenere_decrypt(input_string, @string_key)
       end
       plain = Base64.decode64(base64)
     elsif  @cipher_type == cipherAll[1]
       if params[:commit] == "encrypt"
-        base64 = auto_vigenere_encrypt(@input_text, @string_key)
+        base64 = auto_vigenere_encrypt(input_string, @string_key)
       else
-        base64 = auto_vigenere_decrypt(@input_text, @string_key)
+        base64 = auto_vigenere_decrypt(input_string, @string_key)
       end
       plain = Base64.decode64(base64)
     elsif @cipher_type == cipherAll[3]
       if params[:commit] == "encrypt"
-        base64 = playfair_encrypt(@input_text, @string_key)
+        base64 = playfair_encrypt(input_string, @string_key)
       else
-        base64 = playfair_decrypt(@input_text, @string_key)
+        base64 = playfair_decrypt(input_string, @string_key)
       end
       plain = Base64.decode64(base64)
     elsif @cipher_type == cipherAll[4]
       if params[:commit] == "encrypt"
-        base64 = affine_encrypt(@input_text, @affine_m, @affine_b)
+        base64 = affine_encrypt(input_string, @affine_m, @affine_b)
       else
-        base64 = affine_decrypt(@input_text, @affine_m, @affine_b)
+        base64 = affine_decrypt(input_string, @affine_m, @affine_b)
       end
       plain = Base64.decode64(base64)
     elsif @cipher_type == cipherAll[5]
       if params[:commit] == "encrypt"
-        base64 = hill_encrypt(@input_text, @hill_m, @hill_key)
+        base64 = hill_encrypt(input_string, @hill_m, @hill_key)
       else
-        base64 = hill_decrypt(@input_text, @hill_m, @hill_key)
+        base64 = hill_decrypt(input_string, @hill_m, @hill_key)
       end
       plain = Base64.decode64(base64)
     end

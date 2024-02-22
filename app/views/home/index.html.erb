@@ -1,6 +1,6 @@
 <h1>Classic Cipher Implementation</h1>
 
-<%= form_with url:"home/submit" do |f| %>
+<%= form_with(url:"home/submit", multipart:true) do |f| %>
   <%= f.label "Input Type:" %>
   <%= f.select :select_type, options_for_select(Array["text", "file"], selected: @select_type) %> <br/>
   <div id="input_text_field" style="display: none">
@@ -39,12 +39,24 @@
   <%= f.submit "decrypt" %>
 <% end %>
 
-<%= form_with url:false do |result| %>
+<%= form_with(url:"home/download", method:"get") do |result| %>
   <%= result.text_area :result_plain, :value => @result_plain, readonly: true %>
   <%= result.text_area :result_base64, :value =>@result_base64, readonly: true %> <br/>
-  <%= result.submit "Download" %>
+  <button id="download_button">Download</button>
 <% end %>
 <script>
+    function downloadFile() {
+        var text = document.getElementById('result_plain').value;
+        var filename = "result.txt";
+        var blob = new Blob([text], {type: "text/plain"});
+        var elem = window.document.createElement('a');
+        elem.href = window.URL.createObjectURL(blob);
+        elem.download = filename;
+        document.body.appendChild(elem);
+        elem.click();
+        document.body.removeChild(elem);
+    }
+
     $(document).ready(function() {
         let cipherType = Array("Vigenere Cipher", "Auto-Key Vigenere Cipher", "Extended Vigenere Cipher", "Playfair Cipher", "Affine Cipher", "Hill Cipher", "Super Enkripsi");
         var selectedValue = $('#select_type').val();
@@ -115,6 +127,11 @@
                 }
                 hillDiv.insertAdjacentHTML('beforeend', '<br/>');
             }
+        });
+
+        //download
+        $('#download_button').click(function() {
+            downloadFile();
         });
     });
 </script>
