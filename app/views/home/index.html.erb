@@ -17,6 +17,7 @@
     <%= f.label "Key:" %>
     <%= f.text_field :string_key, value: @string_key %> <br/>
   </div>
+  <div id="affine_key_div" style=""
   <%= f.submit "encrypt" %>
   <%= f.submit "decrypt" %>
 <% end %>
@@ -49,14 +50,14 @@
             }
         });
         selectedValue = $('#cipher_type').val();
-        if (selectedValue === cipherType[0]) {
+        if (selectedValue === cipherType[0] || selectedValue === cipherType[1] || selectedValue === cipherType[3]) {
             $('#string_key_div').show();
         } else {
             $('#string_key_div').hide();
         }
         $("#cipher_type").change(function() {
             var selectedValue = $(this).val();
-            if (selectedValue === cipherType[0]) {
+            if (selectedValue === cipherType[0] || selectedValue === cipherType[1] || selectedValue === cipherType[3]) {
                 $('#string_key_div').show();
             } else {
                 $('#string_key_div').hide();
